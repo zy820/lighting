@@ -12,10 +12,10 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 data = bytearray(self.request.recv(1024).strip())                        #每一个请求都会实例化MyTCPHandler(socketserver.BaseRequestHandler):
                 ip = self.client_address[0]  #ip
                 print("ip:{} wrote:{}".format(ip,data))
-                if len(data)==35
-                    pack_data=struct.unpack(">cBiiiiiiiic",data)
+                if len(data)==31:
+                    pack_data=struct.unpack(">cBiiiiiiic",data)
                     print(pack_data)
-                else
+                else:
                     pass
                 #print(data)
                 #self.request.sendall(self.data.upper())#sendall是重复调用send.
