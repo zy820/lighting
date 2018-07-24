@@ -15,7 +15,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 print("err ",e)
 
 if __name__ == "__main__":
-    HOST, PORT = "localhost", 9999 #windows
-    #HOST, PORT = "0.0.0.0", 9999 #Linux
+    #HOST, PORT = "localhost", 9999    #windows
+    HOST, PORT = "0.0.0.0", 9999       #Linux
     server = socketserver.ThreadingTCPServer((HOST, PORT), MyTCPHandler)   #线程
     server.serve_forever()
