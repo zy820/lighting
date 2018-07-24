@@ -2,15 +2,21 @@
 # -*- coding:utf-8 -*-
 
 import socketserver
+import struct
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
 
     def handle(self):  #所有请求的交互都是在handle里执行的,
         while True:
             try:
-                data = self.request.recv(1024).strip()                        #每一个请求都会实例化MyTCPHandler(socketserver.BaseRequestHandler):
+                data = bytearray(self.request.recv(1024).strip())                        #每一个请求都会实例化MyTCPHandler(socketserver.BaseRequestHandler):
                 ip = self.client_address[0]  #ip
                 print("ip:{} wrote:{}".format(ip,data))
+                if len(data)==35
+                    pack_data=struct.unpack(">cBiiiiiiiic",data)
+                    print(pack_data)
+                else
+                    pass
                 #print(data)
                 #self.request.sendall(self.data.upper())#sendall是重复调用send.
             except ConnectionResetError as e:
