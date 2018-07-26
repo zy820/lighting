@@ -13,7 +13,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 ip = self.client_address[0]  #ip
                 print("ip:{} wrote:{}".format(ip,data))
                 if len(data)==31:
-                    pack_data=struct.unpack(">cBiiiiiiic",data)
+                    pack_data=struct.unpack(">cBiiiiiiic",data)                       #解析字节流，返回tuple类型
                     print(pack_data)
                 else:
                     pass
@@ -37,4 +37,4 @@ if __name__ == "__main__":
     #HOST, PORT = "localhost", 9999   #windows
     HOST, PORT = "0.0.0.0", 9999      #Linux
     server = socketserver.ThreadingTCPServer((HOST, PORT), MyTCPHandler)   #线程
-    server.serve_forever()
+    server.serve_forever()                                                 #永远启动
