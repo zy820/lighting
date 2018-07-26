@@ -15,7 +15,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 ip = self.client_address[0]  # ip
                 print("ip:{} wrote:{}".format(ip, data))
                 if len(data) == 31:
-                    pack_data = struct.unpack(">cBiiiiiiic", data)
+                    pack_data = struct.unpack('>cBiiiiiiic', data)
                     print(pack_data)
                 else:
                     pass
