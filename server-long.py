@@ -23,7 +23,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     pack_data = struct.unpack('>5sBiiiiiiic', data)
                     print(pack_data)
                     #pack_data[0]为设备号
-                    if pack_data[0] == 'zy820' and pack_data[9] == '#' and pack_data[1] != 0x00:
+                    if pack_data[0] == b'zy820' and pack_data[9] == b'#' and pack_data[1] != 0:
                         # 将sensor数据传到dict(sensor_data)
                         sensor_data['DeviceId'] = pack_data[0]
                         sensor_data['AirPressure'] = pack_data[2]
@@ -36,9 +36,11 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                         sensor_que.put(sensor_data, block=True)  # 如果full将一直等待，block=False则引发Full异常
                         print('sensor put in queue!')
                     else:
-                        pass
+                        #pass
+                        print('data error!')
                 else:
-                    pass
+                    #pass
+                    print('len!=35')
                 # print(data)
                 # self.request.sendall(self.data.upper())#sendall是重复调用send.
             except ConnectionResetError as e:
