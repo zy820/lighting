@@ -7,11 +7,7 @@ import queue, threading, multiprocessing
 from sqlalchemy import Column, String, Integer, create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-
-sensor_que = queue.Queue()
-sensor_data = {'DeviceId': '', 'AirPressure': 0, 'Humidity': 0, 'Noise': 0, 'Pm25': 0, 'Temperature': 0,
-               'WindDirection': 0, 'WindSpeed': 0}
-
+import datetime
 
 # socket server类
 class MyTCPHandler(socketserver.BaseRequestHandler):
@@ -23,8 +19,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     self.request.recv(1024).strip())  # 每一个请求都会实例化MyTCPHandler(socketserver.BaseRequestHandler):
                 ip = self.client_address[0]  # ip
                 print("ip:{} wrote:{}".format(ip, data))
-                if len(data) == 31:
-                    pack_data = struct.unpack('>cBiiiiiiic', data)
+                if len(data) == 35:
+                    pack_data = struct.unpack('>5sBiiiiiiic', data)
                     print(pack_data)
                     #pack_data[0]为设备号
                     if pack_data[0] == 'zy820' and pack_data[9] == '#' and pack_data[1] != 0x00:
@@ -38,6 +34,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                         sensor_data['WindDirection'] = pack_data[7]
                         sensor_data['WindSpeed'] = pack_data[8]
                         sensor_que.put(sensor_data, block=True)  # 如果full将一直等待，block=False则引发Full异常
+                        print('sensor put in queue!')
                     else:
                         pass
                 else:
@@ -107,23 +104,27 @@ def getsensor_que():
 def savetosql(sensor):
     # 创建session对象
     session = sqlite_session()
+    datet_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     new_sensor = Sensor(dev_id=sensor['DeviceId'], AirPressure=sensor['AirPressure'], Humidity=sensor['Humidity'],
                         Noise=sensor['Noise'], Pm25=sensor['Pm25'], Temperature=sensor['Temperature'],
-                        WindDirection=sensor['WindDirection'], WindSpeed=sensor['WindSpeed'])
+                        WindDirection=sensor['WindDirection'], WindSpeed=sensor['WindSpeed'], date=datet_time)
     session.add(new_sensor)
     session.commit()
     session.close()
 
 
 if __name__ == "__main__":
+    sensor_que = queue.Queue()
+    sensor_data = {'DeviceId': '', 'AirPressure': 0, 'Humidity': 0, 'Noise': 0, 'Pm25': 0, 'Temperature': 0,
+                   'WindDirection': 0, 'WindSpeed': 0}
     # HOST, PORT = "localhost", 9999   #windows
     HOST, PORT = "0.0.0.0", 9999  # Linux
     server = socketserver.ThreadingTCPServer((HOST, PORT), MyTCPHandler)  # 线程
     server.serve_forever()
-
+    print('before init_db!')
     connect_sql()
     init_db()
-
+    print('after init_db!')
     for i in range(multiprocessing.cpu_count()):
         t = threading.Thread(target=getsensor_que)
         t.start()
