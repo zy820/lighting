@@ -3,15 +3,17 @@
 
 import socketserver
 import struct
-import queue,threading,multiprocessing
-from sqlalchemy import Column,String,create_engine
+import queue, threading, multiprocessing
+from sqlalchemy import Column, String, Integer, create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 sensor_que = queue.Queue()
-sensor_data = {'AirPressure':0,'Humidity':0,'Noise':0,'Pm25':0,'Temperature':0,'WindDirection':0,'WindSpeed':0}
+sensor_data = {'DeviceId': '', 'AirPressure': 0, 'Humidity': 0, 'Noise': 0, 'Pm25': 0, 'Temperature': 0,
+               'WindDirection': 0, 'WindSpeed': 0}
 
-#socket server类
+
+# socket server类
 class MyTCPHandler(socketserver.BaseRequestHandler):
 
     def handle(self):  # 所有请求的交互都是在handle里执行的,
@@ -24,16 +26,18 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 if len(data) == 31:
                     pack_data = struct.unpack('>cBiiiiiiic', data)
                     print(pack_data)
-                    if pack_data[0] == '#' && pack_data[9] == '#' && pack_data[1] != 0x00:       #pack_data[0]
-                        #将sensor数据传到dict(sensor_data)
-                        sensor_data['AirPressure']   = pack_data[2]
-                        sensor_data['Humidity']      = pack_data[3]
-                        sensor_data['Noise']         = pack_data[4]
-                        sensor_data['Pm25']          = pack_data[5]
-                        sensor_data['Temperature']   = pack_data[6]
+                    #pack_data[0]为设备号
+                    if pack_data[0] == 'zy820' and pack_data[9] == '#' and pack_data[1] != 0x00:
+                        # 将sensor数据传到dict(sensor_data)
+                        sensor_data['DeviceId'] = pack_data[0]
+                        sensor_data['AirPressure'] = pack_data[2]
+                        sensor_data['Humidity'] = pack_data[3]
+                        sensor_data['Noise'] = pack_data[4]
+                        sensor_data['Pm25'] = pack_data[5]
+                        sensor_data['Temperature'] = pack_data[6]
                         sensor_data['WindDirection'] = pack_data[7]
-                        sensor_data['WindSpeed']     = pack_data[8]
-                        sensor_que.put(sensor_data,block=True)      #如果full将一直等待，block=False则引发Full异常
+                        sensor_data['WindSpeed'] = pack_data[8]
+                        sensor_que.put(sensor_data, block=True)  # 如果full将一直等待，block=False则引发Full异常
                     else:
                         pass
                 else:
@@ -55,47 +59,71 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         pass
 
 
-#初始化数据库连接
-sqlite_engine = create_engine('sqlite:///lighting.db')    #///后为path
-sqlite_session =  sessionmaker(bind=sqlite_engine)
+def connect_sql():
+    # 初始化数据库连接
+    sqlite_engine = create_engine('sqlite:///lighting.db')  # ///后为path
+    # 创建session类型，为后边创建session实例
+    sqlite_session = sessionmaker(bind=sqlite_engine)
 
-#创建对象基类
+
+# 创建对象基类
 Base = declarative_base()
 
-#初始化数据库，创建表
+
+# 定义Sensor类
+class Sensor(Base):
+    # 表的名字
+    __tablename__ = 'sensor'
+
+    # 表的结构
+    dev_id = Column(String(10), primary_key=True)
+    AirPressure = Column(Integer)
+    Humidity = Column(Integer)
+    Noise = Column(Integer)
+    Pm25 = Column(Integer)
+    Temperature = Column(Integer)
+    WindDirection = Column(Integer)
+    WindSpeed = Column(Integer)
+    date = Column(String(20))
+
+
+# 初始化数据库，创建表
 def init_db():
     Base.metadata.create_all(sqlite_engine)
+
 
 def drop_db():
     Base.metadata.drop_all(sqlite_engine)
 
-#定义Sensor类
-class Sensor(Base):
-    #表的名字
-    __tablename__ = 'sensor'
-
-    #表的结构
-
-
-#从queue中取出sensor
+# 从queue中取出sensor
 def getsensor_que():
     while True:
-        sensor = sensor_que.get(block=True)       #阻塞，queue为空时，不会Queue.Empty异常
+        sensor = sensor_que.get(block=True)  # 阻塞，queue为空时，不会Queue.Empty异常
         print(sensor)
         savetosql(sensor)
 
-#将数据存到数据库
+
+# 将数据存到数据库
 def savetosql(sensor):
-    #连接数据库，存入sensor数据
+    # 创建session对象
+    session = sqlite_session()
+    new_sensor = Sensor(dev_id=sensor['DeviceId'], AirPressure=sensor['AirPressure'], Humidity=sensor['Humidity'],
+                        Noise=sensor['Noise'], Pm25=sensor['Pm25'], Temperature=sensor['Temperature'],
+                        WindDirection=sensor['WindDirection'], WindSpeed=sensor['WindSpeed'])
+    session.add(new_sensor)
+    session.commit()
+    session.close()
 
-
-
-for i in range(multiprocessing.cpu_count()):
-    t = threading.Thread(target=getsensor_que)
-    t.start()
 
 if __name__ == "__main__":
     # HOST, PORT = "localhost", 9999   #windows
     HOST, PORT = "0.0.0.0", 9999  # Linux
     server = socketserver.ThreadingTCPServer((HOST, PORT), MyTCPHandler)  # 线程
     server.serve_forever()
+
+    connect_sql()
+    init_db()
+
+    for i in range(multiprocessing.cpu_count()):
+        t = threading.Thread(target=getsensor_que)
+        t.start()
