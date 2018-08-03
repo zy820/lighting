@@ -30,7 +30,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     #pack_data[0]为设备号
                     if pack_data[0] == b'zy820' and pack_data[9] == b'#' and pack_data[1] != 0:
                         # 将sensor数据传到dict(sensor_data)
-                        sensor_data['DeviceId'] = pack_data[0]
+                        sensor_data['DeviceId'] = pack_data[0].decode('utf-8')
                         sensor_data['AirPressure'] = pack_data[2]
                         sensor_data['Humidity'] = pack_data[3]
                         sensor_data['Noise'] = pack_data[4]
@@ -123,6 +123,7 @@ def savetosql(sensor):
 if __name__ == "__main__":
     sqlite_engine = create_engine('sqlite:///lighting.db', echo=True)  # ///后为path ,echo显示执行的SQL语句
     sqlite_session = sessionmaker(bind=sqlite_engine)
+    init_db()
     for i in range(multiprocessing.cpu_count()):
         threading.Thread(target=getsensor_que).start()
 
