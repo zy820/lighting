@@ -77,8 +77,10 @@ Base = declarative_base()
 class Sensor(Base):
     # 表的名字
     __tablename__ = 'sensor'
+    __table_args__ = {'sqlite_autoincrement': True}
 
     # 表的结构
+    id = Column(Integer, autoincrement=True, primary_key=True)
     dev_id = Column(String(10))
     AirPressure = Column(Integer)
     Humidity = Column(Integer)
