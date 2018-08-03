@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="30cbb542-d85c-4708-a033-d3f80384289c" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/server-long.py" beforeDir="false" afterPath="$PROJECT_DIR$/server-long.py" afterDir="false" />
-    </list>
+    <list default="true" id="30cbb542-d85c-4708-a033-d3f80384289c" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,7 +12,7 @@
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/lighting$lighting.coverage" NAME="lighting Coverage Results" MODIFIED="1532517988205" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/lighting$Flask__hello_py_.coverage" NAME="Flask (hello.py) Coverage Results" MODIFIED="1532584589283" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/lighting$server_long.coverage" NAME="server-long Coverage Results" MODIFIED="1533296997857" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/lighting$server_long.coverage" NAME="server-long Coverage Results" MODIFIED="1533299290216" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/lighting$server.coverage" NAME="server Coverage Results" MODIFIED="1532585382641" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../code" />
   </component>
   <component name="FileEditorManager">
@@ -52,8 +50,8 @@
       <file leaf-file-name="bk.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/../bk.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="499">
-              <caret line="133" lean-forward="true" selection-start-line="133" selection-end-line="133" />
+            <state relative-caret-position="227">
+              <caret line="81" column="30" lean-forward="true" selection-start-line="81" selection-start-column="30" selection-end-line="81" selection-end-column="30" />
               <folding>
                 <element signature="e#46#65#0" expanded="true" />
               </folding>
@@ -502,8 +500,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../bk.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="499">
-          <caret line="133" lean-forward="true" selection-start-line="133" selection-end-line="133" />
+        <state relative-caret-position="227">
+          <caret line="81" column="30" lean-forward="true" selection-start-line="81" selection-start-column="30" selection-end-line="81" selection-end-column="30" />
           <folding>
             <element signature="e#46#65#0" expanded="true" />
           </folding>
