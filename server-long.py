@@ -79,7 +79,7 @@ class Sensor(Base):
     __tablename__ = 'sensor'
 
     # 表的结构
-    dev_id = Column(String(10), primary_key=True)
+    dev_id = Column(String(10))
     AirPressure = Column(Integer)
     Humidity = Column(Integer)
     Noise = Column(Integer)
