@@ -65,7 +65,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
 
 # 初始化数据库连接
-sqlite_engine = create_engine('sqlite:///lighting.db')  # ///后为path
+sqlite_engine = create_engine('sqlite:///lighting.db', echo=True)  # ///后为path ,echo显示执行的SQL语句
 # 创建session类型，为后边创建session实例
 sqlite_session = sessionmaker(bind=sqlite_engine)
 
@@ -111,16 +111,18 @@ def getsensor_que():
 def savetosql(sensor):
     # 创建session对象
     session = sqlite_session()
-    datet_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    date_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     new_sensor = Sensor(dev_id=sensor['DeviceId'], AirPressure=sensor['AirPressure'], Humidity=sensor['Humidity'],
                         Noise=sensor['Noise'], Pm25=sensor['Pm25'], Temperature=sensor['Temperature'],
-                        WindDirection=sensor['WindDirection'], WindSpeed=sensor['WindSpeed'], date=datet_time)
+                        WindDirection=sensor['WindDirection'], WindSpeed=sensor['WindSpeed'], date=date_time)
     session.add(new_sensor)
     session.commit()
     session.close()
 
 
 if __name__ == "__main__":
+    sqlite_engine = create_engine('sqlite:///lighting.db', echo=True)  # ///后为path ,echo显示执行的SQL语句
+    sqlite_session = sessionmaker(bind=sqlite_engine)
     for i in range(multiprocessing.cpu_count()):
         threading.Thread(target=getsensor_que).start()
 
