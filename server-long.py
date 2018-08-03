@@ -9,6 +9,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import datetime
 
+sensor_que = queue.Queue()
+sensor_data = {'DeviceId': '', 'AirPressure': 0, 'Humidity': 0, 'Noise': 0, 'Pm25': 0, 'Temperature': 0,
+                   'WindDirection': 0, 'WindSpeed': 0}
+
+
 # socket server类
 class MyTCPHandler(socketserver.BaseRequestHandler):
 
@@ -23,7 +28,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                     pack_data = struct.unpack('>5sBiiiiiiic', data)
                     print(pack_data)
                     #pack_data[0]为设备号
-                    if pack_data[0] == 'zy820' and pack_data[9] == '#' and pack_data[1] != 0x00:
+                    if pack_data[0] == b'zy820' and pack_data[9] == b'#' and pack_data[1] != 0:
                         # 将sensor数据传到dict(sensor_data)
                         sensor_data['DeviceId'] = pack_data[0]
                         sensor_data['AirPressure'] = pack_data[2]
@@ -36,16 +41,19 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                         sensor_que.put(sensor_data, block=True)  # 如果full将一直等待，block=False则引发Full异常
                         print('sensor put in queue!')
                     else:
-                        pass
+                        #pass
+                        print('Packet error!')
                 else:
-                    pass
-                # print(data)
-                # self.request.sendall(self.data.upper())#sendall是重复调用send.
+                    if data == b'0\x00':
+                        print('Heartbeat packet from:{}'.format(ip))
+                    #pass
+                 #self.request.sendall(self.data.upper())#sendall是重复调用send.
             except ConnectionResetError as e:
                 print("err ", e)
             if not data:
-                print("client {} disconnects...".format(self.client_address[0]))
                 break
+        #self.request.close()
+        print("client {} disconnects...".format(self.client_address[0]))
 
     def setup(self):
         # handle()调用之前，初始化工作
@@ -56,12 +64,10 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         pass
 
 
-def connect_sql():
-    # 初始化数据库连接
-    sqlite_engine = create_engine('sqlite:///lighting.db')  # ///后为path
-    # 创建session类型，为后边创建session实例
-    sqlite_session = sessionmaker(bind=sqlite_engine)
-
+# 初始化数据库连接
+sqlite_engine = create_engine('sqlite:///lighting.db')  # ///后为path
+# 创建session类型，为后边创建session实例
+sqlite_session = sessionmaker(bind=sqlite_engine)
 
 # 创建对象基类
 Base = declarative_base()
@@ -92,6 +98,7 @@ def init_db():
 def drop_db():
     Base.metadata.drop_all(sqlite_engine)
 
+
 # 从queue中取出sensor
 def getsensor_que():
     while True:
@@ -114,17 +121,10 @@ def savetosql(sensor):
 
 
 if __name__ == "__main__":
-    sensor_que = queue.Queue()
-    sensor_data = {'DeviceId': '', 'AirPressure': 0, 'Humidity': 0, 'Noise': 0, 'Pm25': 0, 'Temperature': 0,
-                   'WindDirection': 0, 'WindSpeed': 0}
+    for i in range(multiprocessing.cpu_count()):
+        threading.Thread(target=getsensor_que).start()
+
     # HOST, PORT = "localhost", 9999   #windows
     HOST, PORT = "0.0.0.0", 9999  # Linux
     server = socketserver.ThreadingTCPServer((HOST, PORT), MyTCPHandler)  # 线程
     server.serve_forever()
-    print('before init_db!')
-    connect_sql()
-    init_db()
-    print('after init_db!')
-    for i in range(multiprocessing.cpu_count()):
-        t = threading.Thread(target=getsensor_que)
-        t.start()
